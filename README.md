@@ -1,149 +1,175 @@
 # Local DevOps Pipeline
 
 ## Overview
-
 A comprehensive full-stack local DevOps project demonstrating modern software development and deployment practices. This project showcases a complete CI/CD pipeline with containerized applications, orchestration, and monitoring capabilities, all designed to run in a local development environment.
 
 ## Project Architecture
-
 This project implements a production-grade DevOps workflow featuring:
 
-- **Frontend Application**: Modern web interface for user interaction
-- **Python Backend**: RESTful API services built with Python frameworks
-- **Database Layer**: Persistent data storage with containerized databases
+- **Frontend Application**: Modern web interface built with Node.js
+- **FastAPI Backend**: RESTful API services with Python FastAPI framework
+- **Database Layer**: PostgreSQL for persistent data storage
 - **CI/CD Automation**: Automated build, test, and deployment workflows
 - **Container Orchestration**: Kubernetes manifests for scalable deployment
-- **Monitoring & Observability**: Integrated monitoring stack for application insights
+- **Monitoring & Observability**: Prometheus and Grafana for application insights
 
 ## Technology Stack
 
-- **Backend**: Python (Flask/FastAPI)
-- **Frontend**: React/Vue.js
-- **Database**: PostgreSQL/MongoDB
+- **Backend**: Python 3.11 with FastAPI
+- **Frontend**: Node.js 18 (scaffold ready)
+- **Database**: PostgreSQL 15
 - **Containerization**: Docker
-- **Orchestration**: Kubernetes (k3s/minikube)
-- **CI/CD**: GitHub Actions / Jenkins
-- **Monitoring**: Prometheus, Grafana
+- **Orchestration**: Kubernetes
+- **CI/CD**: GitHub Actions
+- **Monitoring**: Prometheus + Grafana
 - **Version Control**: Git
 
 ## Project Structure
 
 ```
 local-devops-pipeline/
-├── frontend/              # Frontend application code
-├── backend/               # Python backend services
-├── db/                    # Database configurations and scripts
-├── .github/workflows/     # CI/CD pipeline definitions
-├── k8s/                   # Kubernetes manifests
-├── monitoring/            # Monitoring and observability configs
-└── README.md              # Project documentation
+├── backend/
+│   ├── app/
+│   │   └── main.py           # FastAPI application
+│   ├── Dockerfile             # Backend container image
+│   └── requirements.txt       # Python dependencies
+├── frontend/
+│   └── Dockerfile             # Frontend container image (scaffold)
+├── db/
+│   └── docker-compose.yml     # PostgreSQL setup
+├── k8s/
+│   ├── backend-deployment.yaml      # Backend K8s resources
+│   ├── frontend-deployment.yaml     # Frontend K8s resources
+│   └── postgres-statefulset.yaml    # Database K8s resources
+├── monitoring/
+│   ├── docker-compose.yml     # Prometheus + Grafana stack
+│   └── prometheus.yml         # Prometheus configuration
+├── .github/workflows/         # CI/CD pipeline definitions
+└── README.md                  # Project documentation
 ```
 
-## Directory Purpose
+## Components
 
-### `/frontend`
-Contains the frontend application with modern JavaScript frameworks, component libraries, and static assets.
+### Backend Service
+- **Technology**: FastAPI with Python 3.11
+- **Dependencies**: uvicorn, psycopg2-binary, sqlalchemy, pydantic
+- **Features**: RESTful API, database integration, async support
+- **Port**: 8000
 
-### `/backend`
-Python-based backend services including API endpoints, business logic, authentication, and data processing modules.
+### Frontend Service
+- **Technology**: Node.js 18 Alpine
+- **Status**: Scaffold Dockerfile ready for implementation
+- **Port**: 3000
 
-### `/db`
-Database schemas, migration scripts, seed data, and database configuration files.
+### Database
+- **Technology**: PostgreSQL 15 Alpine
+- **Configuration**: 
+  - User: devops
+  - Database: devopsdb
+  - Port: 5432
+- **Storage**: Persistent volume support
 
-### `/.github/workflows`
-CI/CD pipeline configurations including automated testing, linting, building, and deployment workflows.
+### Kubernetes Manifests
+- **Backend**: Deployment with 2 replicas + ClusterIP Service
+- **Frontend**: Deployment with 2 replicas + NodePort Service
+- **Database**: StatefulSet with PVC + ClusterIP Service
 
-### `/k8s`
-Kubernetes manifests for deploying applications including deployments, services, configmaps, secrets, and ingress rules.
-
-### `/monitoring`
-Monitoring stack configurations including Prometheus rules, Grafana dashboards, and alerting configurations.
+### Monitoring Stack
+- **Prometheus**: Metrics collection and monitoring
+  - Port: 9090
+  - Scrapes: backend, postgres, node-exporter
+- **Grafana**: Visualization and dashboards
+  - Port: 3001
+  - Default credentials: admin/admin
 
 ## Getting Started
 
 ### Prerequisites
-
 - Docker and Docker Compose
-- Kubernetes (minikube, k3s, or Docker Desktop with Kubernetes)
-- Python 3.9+
-- Node.js 16+
+- Kubernetes (minikube, k3s, or Docker Desktop)
 - kubectl CLI
+- Git
 
-### Local Development Setup
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/Srinivasbanda11/local-devops-pipeline.git
-   cd local-devops-pipeline
-   ```
-
-2. Set up the backend:
-   ```bash
-   cd backend
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   pip install -r requirements.txt
-   ```
-
-3. Set up the frontend:
-   ```bash
-   cd frontend
-   npm install
-   ```
-
-4. Start the development environment:
-   ```bash
-   docker-compose up -d
-   ```
-
-## Features
-
-- ✅ Containerized microservices architecture
-- ✅ Automated CI/CD pipelines
-- ✅ Infrastructure as Code (IaC)
-- ✅ Kubernetes orchestration
-- ✅ Monitoring and logging integration
-- ✅ Security best practices
-- ✅ Scalable and maintainable codebase
-
-## Deployment
-
-Detailed deployment instructions for various environments will be provided in respective directory documentation.
-
-### Local Kubernetes Deployment
-
+### Running the Database
 ```bash
-kubectl apply -f k8s/
+cd db
+docker-compose up -d
 ```
 
-## Monitoring
+### Building and Running Backend
+```bash
+cd backend
+docker build -t backend:latest .
+docker run -p 8000:8000 backend:latest
+```
 
-Access monitoring dashboards:
-- Grafana: http://localhost:3000
+### Running Monitoring Stack
+```bash
+cd monitoring
+docker-compose up -d
+```
+Access:
 - Prometheus: http://localhost:9090
+- Grafana: http://localhost:3001
+
+### Deploying to Kubernetes
+```bash
+# Apply all manifests
+kubectl apply -f k8s/
+
+# Check deployment status
+kubectl get pods
+kubectl get services
+```
+
+## Development Workflow
+
+1. **Local Development**: Use Docker Compose for quick iteration
+2. **Testing**: Automated tests run via GitHub Actions
+3. **Build**: Docker images built for each service
+4. **Deploy**: Kubernetes manifests for production-like environment
+5. **Monitor**: Prometheus and Grafana track application health
+
+## CI/CD Pipeline
+
+The project uses GitHub Actions for automated workflows:
+- Code linting and validation
+- Automated testing
+- Docker image building
+- Deployment automation
+
+## Monitoring and Observability
+
+- **Prometheus** collects metrics from all services
+- **Grafana** provides visualization dashboards
+- **Health checks** ensure service availability
+- **Logging** for debugging and troubleshooting
+
+## Best Practices Implemented
+
+- ✅ Multi-stage Docker builds for optimized images
+- ✅ Environment-based configuration
+- ✅ Health checks for all services
+- ✅ Persistent storage for stateful services
+- ✅ Resource limits and requests in K8s
+- ✅ Rolling updates and zero-downtime deployments
+- ✅ Monitoring and alerting
+- ✅ Infrastructure as Code
+
+## Future Enhancements
+
+- [ ] Implement frontend application
+- [ ] Add API authentication and authorization
+- [ ] Set up automated testing suite
+- [ ] Configure Grafana dashboards
+- [ ] Add logging aggregation (ELK/Loki)
+- [ ] Implement service mesh (Istio)
+- [ ] Add secrets management (Vault)
 
 ## Contributing
 
-Contributions are welcome! Please follow these steps:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+Feel free to submit issues and enhancement requests!
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Project Status
-
-🚧 **Under Active Development** - Project structure and documentation are being established.
-
-## Contact
-
-Project maintained by [Srinivasbanda11](https://github.com/Srinivasbanda11)
-
----
-
-**Note**: This is a learning and demonstration project showcasing DevOps best practices in a local development environment.
+This project is for educational and demonstration purposes.
